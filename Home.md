@@ -196,13 +196,29 @@ Attempting to connect to 00:12:34:56:78:90
 Connection successful
 ````
 
+### Start and stop sounds
+Play some sounds when PI starts and when it shuts down.  
+
+scp some **short** samples to PI.  
+I used ``/usr/local/share/sounds/`` dir.  
+
+````
+vim /etc/systemd/system/pulseaudio.service
+8------------------------------------------------------------------------8
++ ExecStartPre=/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Hello.ogg
+  ExecStart=/usr/bin/pulseaudio --system --disallow-exit --disable-shm
++ ExecStopPost=/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Goodbye.ogg
+8------------------------------------------------------------------------8
+````
+
+
 # Result
 At this point, you have:
 
 1. Autonomous system: just power it up and you can connect to it via bluetooth
 2. Audio is playing on raspi speakers with A2DP protocol
 3. Control volume/songs/everything with bluetooth device
-
+4. PI plays sample sounds when it start and when it shuts down
 
 
 # Details on project
