@@ -1,3 +1,30 @@
+# HifiBerry AMP+
+## Config
+[You should look at this doc](https://github.com/project-owner/Peppy.doc/wiki/HiFiBerry%20Amp)  
+
+Configuration for Raspbian Jessie:
+````
+vim /boot/config.txt
+8------------------------------------------------------------------------8
+ - dtparam=audio=on
+ + #dtparam=audio=on
+ +
+ + # HifiBerry
+ + dtoverlay=hifiberry-amp
+8------------------------------------------------------------------------8
+
+vim /etc/asound.conf
+8------------------------------------------------------------------------8
+pcm.!default  {
+ type hw card 0
+}
+ctl.!default {
+ type hw card 0
+}
+8------------------------------------------------------------------------8
+````
+
+## Details
 I use Hifiberry AMP+ card to enjoy a really good sound.  
 The integrated sound card is not so good but can be OK for a small extra sound device.
 

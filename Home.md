@@ -3,6 +3,12 @@
 **How**: via Bluetooth + PulseAudio  
 **Aim**: Synced Multi-room Audio receiver/issuer that works with as many equipment as possible  
 
+## Versions
+This doc will often update to add new features and stuff.  
+See 
+* [CHANGELOG](https://github.com/vgallissot/raspberry-pi-audio-system.doc/blob/master/CHANGELOG.md)
+* [ROADMAP](https://github.com/vgallissot/raspberry-pi-audio-system.doc/blob/master/ROADMAP.md)
+
 
 # Configuration
 ## Hardware
@@ -23,29 +29,9 @@ You just have to install it on a SD flash card:
 1. [Download latest Raspbian LITE release](https://www.raspberrypi.org/downloads/raspbian/)
 2. [Follow steps to install it on your SD card](https://www.raspberrypi.org/documentation/installation/installing-images/linux.md)
 
-### Configure Hifiberry AMP+
-[You should look at this doc](https://github.com/project-owner/Peppy.doc/wiki/HiFiBerry%20Amp)  
+### Configure Hifiberry AMP+ (optionnal)
+* [Go to the dedicated page](https://github.com/vgallissot/raspberry-pi-audio-system.doc/wiki/Amplifier)  
 
-````
-vim /boot/config.txt
-8------------------------------------------------------------------------8
- - dtparam=audio=on
- + #dtparam=audio=on
- +
- + # HifiBerry
- + dtoverlay=hifiberry-amp
-8------------------------------------------------------------------------8
-
-vim /etc/asound.conf
-8------------------------------------------------------------------------8
-pcm.!default  {
- type hw card 0
-}
-ctl.!default {
- type hw card 0
-}
-8------------------------------------------------------------------------8
-````
 
 ### Disable default wireless and enable the dongle
 ````
@@ -67,29 +53,37 @@ shutdown -r now
 ````
 
 ### Test sound
-scp some mp3 file to the PI
+scp some mp3 file to the PI and play it: 
 
 ````
 apt-get update
 apt-get install mplayer -y
 amixer sset 'Master'  -- 70%
 mplayer 02.\ I\ Fink\ U\ Freeky.mp3
-
-=> Sound should be OK.
-'aplay -l' should output only 1 card.
 ````
+
+=> Sound should be OK.  
+``aplay -l`` should output only 1 card.
+
 
 ### bluetooth support
+Install bluez + dependency to pulseaudio
 ````
 apt-get install -y pulseaudio-module-bluetooth bluez-tools
+````
 
+Make the Bluetooth up at startup
+````
 vim /etc/systemd/system/bluetooth.target.wants/bluetooth.service
 8------------------------------------------------------------------------8
     - ExecStart=/usr/lib/bluetooth/bluetoothd
     + ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=sap
     + ExecStartPost=/bin/hciconfig hci0 up
 8------------------------------------------------------------------------8
+````
 
+Configure class of BT. It defines what capabilities your BT will have (audio only / audio + micro / etc.).
+````
 vim /etc/bluetooth/main.conf
 8------------------------------------------------------------------------8
 # Changing name here has no effect
@@ -98,6 +92,24 @@ Class = 0x0c0420
 ````
 
 ### Configure PulseAudio
+We need the 'pulse' user to access bluetooth via dbus
+````
+vim /etc/dbus-1/system.d/pulseaudio-bluetooth.conf
+8------------------------------------------------------------------------8
+<busconfig>
+
+  <policy user="pulse">
+    <allow send_destination="org.bluez"/> 
+  </policy>
+
+</busconfig>
+8------------------------------------------------------------------------8
+````
+
+Restart dbus with ``systemctl restart dbus``
+
+
+PulseAudio on a desktop is not started as a deamon ([Check out why](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/)). For a standalone sound system, we need it to be started as a system-wide daemon.
 ````
 vim /etc/systemd/system/pulseaudio.service
 8------------------------------------------------------------------------8
@@ -112,21 +124,11 @@ ExecStart=/usr/bin/pulseaudio --system --disallow-exit --disable-shm
 WantedBy=multi-user.target
 8------------------------------------------------------------------------8
 
-vim /etc/dbus-1/system.d/pulseaudio-bluetooth.conf
-8------------------------------------------------------------------------8
-<busconfig>
-
-  <policy user="pulse">
-    <allow send_destination="org.bluez"/> 
-  </policy>
-
-</busconfig>
-8------------------------------------------------------------------------8
-
 systemctl daemon-reload
-systemctl --system enable pulseaudio.service
-systemctl --system start pulseaudio.service
+````
 
+Load bluetooth modules for pulseaudio
+````
 vim /etc/pulse/system.pa
 8------------------------------------------------------------------------8
 ### Automatically load driver modules for Bluetooth hardware
@@ -138,8 +140,10 @@ load-module module-bluetooth-policy
 load-module module-bluetooth-discover
 .endif
 8------------------------------------------------------------------------8
+````
 
-
+As the PI is used as a dedicated device for audio : No Restrictions on PI's consumptions = Best Audio quality possible (improvements are welcome)
+````
 vim /etc/pulse/daemon.conf
 8------------------------------------------------------------------------8
 cpu-limit = no
@@ -158,7 +162,8 @@ alternate-sample-rate = 176000
 default-sample-channels = 2
 8------------------------------------------------------------------------8
 
-service pulseaudio restart
+systemctl --system enable pulseaudio.service
+systemctl --system start pulseaudio.service
 ````
 
 ### Custom Bluetooth name
@@ -196,7 +201,7 @@ At this point, you have:
 
 1. Autonomous system: just power it up and you can connect to it via bluetooth
 2. Audio is playing on raspi speakers with A2DP protocol
-3. Control volume/songs/everything with phone
+3. Control volume/songs/everything with bluetooth device
 
 
 
@@ -205,9 +210,6 @@ This documentation aims people who got lost trying to make audio stuff with rasp
 A lot of internet docs about PI & audio are deprecated because of old PI or old Operating System.  
 This one is to be used for Raspberry PI 3 + Raspbian Jessie.
 The Idea is to make a Sonos like multiroom soundsystem.
-
-This doc will often update to add new features and stuff.  
-See changelog and roadmap.  
 
 ## Why Bluetooth?
 I tried several options and Bluetooth **really** is the best.  
