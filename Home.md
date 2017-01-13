@@ -156,9 +156,9 @@ resample-method = ffmpeg
 enable-remixing = no
 enable-lfe-remixing = no
 
-default-sample-format = float32ne
-default-sample-rate = 192000
-alternate-sample-rate = 176000
+default-sample-format = s32le
+default-sample-rate = 44100
+alternate-sample-rate = 48000
 default-sample-channels = 2
 8------------------------------------------------------------------------8
 
