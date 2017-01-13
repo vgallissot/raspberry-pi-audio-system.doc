@@ -32,8 +32,30 @@ You just have to install it on a SD flash card:
 ### Configure Hifiberry AMP+ (optionnal)
 * [Go to the dedicated page](https://github.com/vgallissot/raspberry-pi-audio-system.doc/wiki/Amplifier)  
 
+### Force static names for wlan interfaces
+Whitelist wlan devices.
+````
+vim /lib/udev/rules.d/75-persistent-net-generator.rules
+8------------------------------------------------------------------------8
+- KERNEL!="ath*|msh*|ra*|sta*|ctc*|lcs*|hsi*", \
++ KERNEL!="ath*|wlan*[0-9]|msh*|ra*|sta*|ctc*|lcs*|hsi*", \
+8------------------------------------------------------------------------8
+````
+``/etc/udev/rules/70-persistent-net.rules`` file will be created after reboot containing fixed wlan names according to MAC addresses.  
+
 
 ### Disable default wireless and enable the dongle
+````
+modprobe -r -v brcmfmac
+vim /etc/modprobe.d/raspi-blacklist.conf
+8------------------------------------------------------------------------8
+#wifi
+blacklist brcmfmac
+#blacklist brcmutil
+8------------------------------------------------------------------------8
+````
+
+
 ````
 vim /etc/network/interfaces
 8------------------------------------------------------------------------8
@@ -45,7 +67,7 @@ iface wlan1 inet manual
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
 8------------------------------------------------------------------------8
 ````
-Edit wpa_supplicant.conf according to your WiFi specs.
+Edit wpa_supplicant.conf according to your WiFi specs.  
 
 Reboot and be ready
 ````
