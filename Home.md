@@ -201,14 +201,18 @@ Play some sounds when PI starts and when it shuts down.
 
 scp some **short** samples to PI.  
 I used ``/usr/local/share/sounds/`` dir.  
+I force a low volume when stopping PulseAudio to avoid unwanted crazy notifications.  
 
 ````
 vim /etc/systemd/system/pulseaudio.service
 8------------------------------------------------------------------------8
-+ ExecStartPre=/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Hello.ogg
++ ExecStartPre=-/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Hello.ogg
++ ExecStartPre=-/usr/bin/amixer sset 'Master'  -- 80%%
   ExecStart=/usr/bin/pulseaudio --system --disallow-exit --disable-shm
-+ ExecStopPost=/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Goodbye.ogg
++ ExecStopPost=-/usr/bin/amixer sset 'Master'  -- 55%%
++ ExecStopPost=-/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Goodbye.ogg
 8------------------------------------------------------------------------8
+systemctl daemon-reload
 ````
 
 
