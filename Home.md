@@ -100,7 +100,6 @@ vim /etc/systemd/system/bluetooth.target.wants/bluetooth.service
 8------------------------------------------------------------------------8
     - ExecStart=/usr/lib/bluetooth/bluetoothd
     + ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=sap
-    + ExecStartPost=/bin/hciconfig hci0 up
 8------------------------------------------------------------------------8
 ````
 
