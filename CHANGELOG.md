@@ -1,6 +1,21 @@
 # ChangeLog
 
-## 1.0.0 (2017-01-12)
+## 2.0 (2017-01-17)
+Enable notifications
+
+### Enhancements
+
+- Use udev rule to trigger actions
+- Play notifications at startup / shutdown / device connect / disconnect
+
+### Bug fixes
+
+- Bad sample rates used with hifiberry card
+- Random wlan names
+- Raspberry wlan card still active
+
+
+## 1.0 (2017-01-12)
 First release.
 
 ### Enhancements
