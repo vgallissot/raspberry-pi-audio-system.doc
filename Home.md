@@ -217,24 +217,97 @@ Attempting to connect to 00:12:34:56:78:90
 Connection successful
 ````
 
-### Start and stop sounds
-Play some sounds when PI starts and when it shuts down.  
+### Notification sounds
+Play some sounds when:
+* PI starts
+* PI shuts down
+* Bluetooth device connects
+* Bluetooth device disconnects
 
+#### Sounds
 scp some **short** samples to PI.  
 I used ``/usr/local/share/sounds/`` dir.  
-I force a low volume when stopping PulseAudio to avoid unwanted crazy notifications.  
+I force a lower volume to avoid unwanted_crazy_loud notifications.  
+
+#### Udev triggered script
+I ran ``udevadm monitor --environment`` to monitor udev and kernel events.  
 
 ````
-vim /etc/systemd/system/pulseaudio.service
+vim /usr/local/bin/bluetooth-udev
 8------------------------------------------------------------------------8
-+ ExecStartPre=-/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Hello.ogg
-+ ExecStartPre=-/usr/bin/amixer sset 'Master'  -- 80%%
-  ExecStart=/usr/bin/pulseaudio --system --disallow-exit --disable-shm
-+ ExecStopPost=-/usr/bin/amixer sset 'Master'  -- 55%%
-+ ExecStopPost=-/usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Goodbye.ogg
+#!/bin/bash
+# This script will play sound depending of event
+
+NORMAL_SOUND_LEVEL=$(/usr/bin/amixer get Master | awk '$0~/%/{print $5}' |head -1 | tr -d '[]')
+NOTIFICATION_SOUND_LEVEL=55%
+
+# Reduce sound
+/usr/bin/amixer sset 'Master' -- ${NOTIFICATION_SOUND_LEVEL}
+
+# Trigger correct sound for each situation
+if [ "$1" == 'device' ]
+then
+    case $ACTION in
+        add)  # when device connects
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Hello.ogg
+        ;;
+        remove)  # when device disconnects
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Goodbye.ogg
+        ;;
+        *)  # unknown action of device
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Who_are_you.ogg
+        ;;
+    esac
+elif [ "$1" == 'card' ]
+then
+    case $ACTION in
+        add)  # when card is activated
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Activated.ogg
+        ;;
+        remove)  # when card is desactivated
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Shutting_down.ogg
+        ;;
+        *)   # unknown action of card
+            /usr/bin/mplayer --really-quiet /usr/local/share/sounds/portal/Space.ogg
+        ;;
+    esac
+fi
+
+# Put sound at its original level
+/usr/bin/amixer sset 'Master' -- ${NORMAL_SOUND_LEVEL}
+
+exit 0
 8------------------------------------------------------------------------8
-systemctl daemon-reload
+
+chmod +x /usr/local/bin/bluetooth-udev
 ````
+
+#### Allow users to play sound
+Only members of 'pulse-access' group can connect to pulse audio daemon (therefore playing sound).  
+Allow root (udev will executes the script as root) to connect to pulseaudio
+````
+usermod -a -G pulse-access root
+````
+
+#### Add udev rule
+Trigger the script via some udev rules
+````
+vim /etc/udev/rules.d/99-custom-bluetooth.rules
+8------------------------------------------------------------------------8
+# Triggered when bluetooth card is enabled
+ACTION=="add", SUBSYSTEM=="bluetooth", KERNEL=="hci[0-9]*", RUN+="/usr/local/bin/bluetooth-udev card"
+
+# Triggered when bluetooth card is disabled
+ACTION=="remove", SUBSYSTEM=="bluetooth", KERNEL=="hci[0-9]*", RUN+="/usr/local/bin/bluetooth-udev card"
+
+# Triggered when bluetooth device connects
+ACTION=="add", SUBSYSTEM=="bluetooth", KERNEL=="hci0:[0-9]*", RUN+="/usr/local/bin/bluetooth-udev device"
+
+# Triggered when bluetooth device DISconnects
+ACTION=="remove", SUBSYSTEM=="bluetooth", KERNEL=="hci0:[0-9]*", RUN+="/usr/local/bin/bluetooth-udev device"
+8------------------------------------------------------------------------8
+````
+
 
 
 # Result
@@ -243,7 +316,7 @@ At this point, you have:
 1. Autonomous system: just power it up and you can connect to it via bluetooth
 2. Audio is playing on raspi speakers with A2DP protocol
 3. Control volume/songs/everything with bluetooth device
-4. PI plays sample sounds when it start and when it shuts down
+4. PI plays sample sounds when desired
 
 
 # Details on project
