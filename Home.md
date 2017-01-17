@@ -45,6 +45,7 @@ vim /lib/udev/rules.d/75-persistent-net-generator.rules
 
 
 ### Disable default wireless and enable the dongle
+Unload the kernel module of raspberry3 wireless card
 ````
 modprobe -r -v brcmfmac
 vim /etc/modprobe.d/raspi-blacklist.conf
@@ -55,15 +56,13 @@ blacklist brcmfmac
 8------------------------------------------------------------------------8
 ````
 
-
+Configure wlan0 which is now the only wlan card
 ````
 vim /etc/network/interfaces
 8------------------------------------------------------------------------8
+auto wlan0
+allow-hotplug wlan0
 iface wlan0 inet manual
-
-auto wlan1
-allow-hotplug wlan1
-iface wlan1 inet manual
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
 8------------------------------------------------------------------------8
 ````
@@ -88,7 +87,7 @@ mplayer 02.\ I\ Fink\ U\ Freeky.mp3
 ``aplay -l`` should output only 1 card.
 
 
-### bluetooth support
+### Bluetooth support
 Install bluez + dependency to pulseaudio
 ````
 apt-get install -y pulseaudio-module-bluetooth bluez-tools
