@@ -1,14 +1,39 @@
-## TL;DR
+# TL;DR
 **What**: doc to play sound on PI  
 **How**: via Bluetooth + PulseAudio  
 **Aim**: Synced Multi-room Audio receiver/issuer that works with as many equipment as possible  
 
-## Versions
+# Versions
 This doc will often update to add new features and stuff.  
 See 
 * [CHANGELOG](https://github.com/vgallissot/raspberry-pi-audio-system.doc/blob/master/CHANGELOG.md)
 * [ROADMAP](https://github.com/vgallissot/raspberry-pi-audio-system.doc/blob/master/ROADMAP.md)
 
+# ToC
+* [TL;DR](#tldr)
+* [Versions](#versions)
+* [ToC](#toc)
+* [Configuration](#configuration)
+  * [Hardware](#hardware)
+  * [Software](#software)
+    * [OS](#os)
+    * [Configure Hifiberry AMP  (optionnal)](#configure-hifiberry-amp-optionnal)
+    * [Force static names for wlan interfaces](#force-static-names-for-wlan-interfaces)
+    * [Disable default wireless and enable the dongle](#disable-default-wireless-and-enable-the-dongle)
+    * [Test sound](#test-sound)
+    * [Bluetooth support](#bluetooth-support)
+    * [Configure PulseAudio](#configure-pulseaudio)
+    * [Custom Bluetooth name](#custom-bluetooth-name)
+    * [Manual pairing](#manual-pairing)
+    * [Notification sounds](#notification-sounds)
+      * [Sounds](#sounds)
+      * [Udev triggered script](#udev-triggered-script)
+      * [Allow users to play sound](#allow-users-to-play-sound)
+      * [Add udev rule](#add-udev-rule)
+* [Result](#result)
+* [Details on project](#details-on-project)
+  * [Why Bluetooth?](#why-bluetooth)
+  * [Why PulseAudio?](#why-pulseaudio)
 
 # Configuration
 ## Hardware
