@@ -1,5 +1,12 @@
 # ChangeLog
 
+## 2.1 (2017-01-18)
+
+### Enhancements
+
+- Add Table of contents [Thanks to this repo](https://github.com/ekalinin/github-markdown-toc)
+
+
 ## 2.0 (2017-01-17)
 Enable notifications
 

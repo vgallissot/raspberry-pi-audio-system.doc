@@ -1,6 +1,6 @@
 ## Active roadmap
 
-Current version is: v2.0
+Current version is: v2.1
 
 * v3.0: (in progress) autopairing and autoconnect
 * v2.0: Play some sounds when PI is ready to connect + when connected + when disconnected + when shutting down
