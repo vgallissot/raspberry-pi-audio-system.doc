@@ -59,19 +59,19 @@ You just have to install it on a SD flash card:
 
 ### Force static names for wlan interfaces
 Whitelist wlan devices.
-````
+```
 vim /lib/udev/rules.d/75-persistent-net-generator.rules
 8------------------------------------------------------------------------8
 - KERNEL!="ath*|msh*|ra*|sta*|ctc*|lcs*|hsi*", \
 + KERNEL!="ath*|wlan*[0-9]|msh*|ra*|sta*|ctc*|lcs*|hsi*", \
 8------------------------------------------------------------------------8
-````
+```
 ``/etc/udev/rules/70-persistent-net.rules`` file will be created after reboot containing fixed wlan names according to MAC addresses.  
 
 
 ### Disable default wireless and enable the dongle
 Unload the kernel module of raspberry3 wireless card
-````
+```
 modprobe -r -v brcmfmac
 vim /etc/modprobe.d/raspi-blacklist.conf
 8------------------------------------------------------------------------8
@@ -79,10 +79,10 @@ vim /etc/modprobe.d/raspi-blacklist.conf
 blacklist brcmfmac
 #blacklist brcmutil
 8------------------------------------------------------------------------8
-````
+```
 
 Configure wlan0 which is now the only wlan card
-````
+```
 vim /etc/network/interfaces
 8------------------------------------------------------------------------8
 auto wlan0
@@ -90,23 +90,23 @@ allow-hotplug wlan0
 iface wlan0 inet manual
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
 8------------------------------------------------------------------------8
-````
+```
 Edit wpa_supplicant.conf according to your WiFi specs.  
 
 Reboot and be ready
-````
+```
 shutdown -r now
-````
+```
 
 ### Test sound
 scp some mp3 file to the PI and play it: 
 
-````
+```
 apt-get update
 apt-get install mplayer -y
 amixer sset 'Master'  -- 70%
 mplayer 02.\ I\ Fink\ U\ Freeky.mp3
-````
+```
 
 => Sound should be OK.  
 ``aplay -l`` should output only 1 card.
@@ -114,31 +114,31 @@ mplayer 02.\ I\ Fink\ U\ Freeky.mp3
 
 ### Bluetooth support
 Install bluez + dependency to pulseaudio
-````
+```
 apt-get install -y pulseaudio-module-bluetooth bluez-tools
-````
+```
 
 Make the Bluetooth up at startup
-````
+```
 vim /etc/systemd/system/bluetooth.target.wants/bluetooth.service
 8------------------------------------------------------------------------8
     - ExecStart=/usr/lib/bluetooth/bluetoothd
     + ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=sap
 8------------------------------------------------------------------------8
-````
+```
 
 Configure class of BT. It defines what capabilities your BT will have (audio only / audio + micro / etc.).
-````
+```
 vim /etc/bluetooth/main.conf
 8------------------------------------------------------------------------8
 # Changing name here has no effect
 Class = 0x0c0420
 8------------------------------------------------------------------------8
-````
+```
 
 ### Configure PulseAudio
 We need the 'pulse' user to access bluetooth via dbus
-````
+```
 vim /etc/dbus-1/system.d/pulseaudio-bluetooth.conf
 8------------------------------------------------------------------------8
 <busconfig>
@@ -149,13 +149,13 @@ vim /etc/dbus-1/system.d/pulseaudio-bluetooth.conf
 
 </busconfig>
 8------------------------------------------------------------------------8
-````
+```
 
 Restart dbus with ``systemctl restart dbus``
 
 
 PulseAudio on a desktop is not started as a deamon ([Check out why](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/)). For a standalone sound system, we need it to be started as a system-wide daemon.
-````
+```
 vim /etc/systemd/system/pulseaudio.service
 8------------------------------------------------------------------------8
 [Unit]
@@ -170,10 +170,10 @@ WantedBy=multi-user.target
 8------------------------------------------------------------------------8
 
 systemctl daemon-reload
-````
+```
 
 Load bluetooth modules for pulseaudio
-````
+```
 vim /etc/pulse/system.pa
 8------------------------------------------------------------------------8
 ### Automatically load driver modules for Bluetooth hardware
@@ -185,10 +185,10 @@ load-module module-bluetooth-policy
 load-module module-bluetooth-discover
 .endif
 8------------------------------------------------------------------------8
-````
+```
 
 As the PI is used as a dedicated device for audio : No Restrictions on PI's consumptions = Best Audio quality possible (improvements are welcome)
-````
+```
 vim /etc/pulse/daemon.conf
 8------------------------------------------------------------------------8
 cpu-limit = no
@@ -209,17 +209,17 @@ default-sample-channels = 2
 
 systemctl --system enable pulseaudio.service
 systemctl --system start pulseaudio.service
-````
+```
 
 ### Custom Bluetooth name
-````
+```
 echo 'PRETTY_HOSTNAME=$myawesomename' >> /etc/machine-info
 service bluetooth restart
-````
+```
 
 ### Manual pairing
 example from [archlinux doc](https://wiki.archlinux.org/index.php/bluetooth#Bluetoothctl)
-````
+```
 bluetoothctl
 # bluetoothctl 
 [NEW] Controller 00:10:20:30:40:50 pi [default]
@@ -239,7 +239,7 @@ Pairing successful
 Attempting to connect to 00:12:34:56:78:90
 [CHG] Device 00:12:34:56:78:90 Connected: yes
 Connection successful
-````
+```
 
 ### Notification sounds
 Play some sounds when:
@@ -256,7 +256,7 @@ I force a lower volume to avoid unwanted_crazy_loud notifications.
 #### Udev triggered script
 I ran ``udevadm monitor --environment`` to monitor udev and kernel events.  
 
-````
+```
 vim /usr/local/bin/bluetooth-udev
 8------------------------------------------------------------------------8
 #!/bin/bash
@@ -304,18 +304,18 @@ exit 0
 8------------------------------------------------------------------------8
 
 chmod +x /usr/local/bin/bluetooth-udev
-````
+```
 
 #### Allow users to play sound
 Only members of 'pulse-access' group can connect to pulse audio daemon (therefore playing sound).  
 Allow root (udev will executes the script as root) to connect to pulseaudio
-````
+```
 usermod -a -G pulse-access root
-````
+```
 
 #### Add udev rule
 Trigger the script via some udev rules
-````
+```
 vim /etc/udev/rules.d/99-custom-bluetooth.rules
 8------------------------------------------------------------------------8
 # Triggered when bluetooth card is enabled
@@ -330,7 +330,7 @@ ACTION=="add", SUBSYSTEM=="bluetooth", KERNEL=="hci0:[0-9]*", RUN+="/usr/local/b
 # Triggered when bluetooth device DISconnects
 ACTION=="remove", SUBSYSTEM=="bluetooth", KERNEL=="hci0:[0-9]*", RUN+="/usr/local/bin/bluetooth-udev device"
 8------------------------------------------------------------------------8
-````
+```
 
 
 

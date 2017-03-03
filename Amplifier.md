@@ -3,7 +3,7 @@
 [You should look at this doc](https://github.com/project-owner/Peppy.doc/wiki/HiFiBerry%20Amp)  
 
 Configuration for Raspbian Jessie:
-````
+```
 vim /boot/config.txt
 8------------------------------------------------------------------------8
  - dtparam=audio=on
@@ -22,7 +22,7 @@ ctl.!default {
  type hw card 0
 }
 8------------------------------------------------------------------------8
-````
+```
 
 ## Details
 I use Hifiberry AMP+ card to enjoy a really good sound.  
