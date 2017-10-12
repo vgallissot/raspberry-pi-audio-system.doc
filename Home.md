@@ -241,6 +241,11 @@ Attempting to connect to 00:12:34:56:78:90
 Connection successful
 ```
 
+One needs to trust any paired device to avoid `bluetoothd: authentication error`
+```
+[bluetooth]# trust 00:12:34:56:78:90
+```
+
 ### Notification sounds
 Play some sounds when:
 * PI starts
